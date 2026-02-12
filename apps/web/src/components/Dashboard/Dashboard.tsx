@@ -4,18 +4,24 @@ import { api } from '@/lib/api';
 import styles from './Dashboard.module.scss';
 
 type Wishlist = { id: string; title: string; public_id: string };
+type Profile = { id: string; email: string; username: string };
 
 export function Dashboard() {
   const [rows, setRows] = useState<Wishlist[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     void api<Wishlist[]>('/wishlists').then(setRows).catch(() => setRows([]));
+    void api<Profile>('/auth/me').then(setProfile).catch(() => setProfile(null));
   }, []);
 
   return (
     <main className={styles.main}>
       <div className={styles.header}>
-        <h1>Мои вишлисты</h1>
+        <div>
+          <h1>Мои вишлисты</h1>
+          {profile ? <p className={styles.profile}>Вы вошли как @{profile.username}</p> : null}
+        </div>
         <Link href="/app/wishlists/new">Создать</Link>
       </div>
 

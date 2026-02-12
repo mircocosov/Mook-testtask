@@ -8,7 +8,13 @@
   display: grid;
   gap: 12px;
 
-  h1 { margin: 0 0 8px; }
+  h1 { margin: 0; }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 
   input {
     border: 1px solid var(--border);
@@ -23,6 +29,13 @@
     color: #fff;
     padding: 11px;
     cursor: pointer;
+  }
+
+  .logout {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 7px 10px;
   }
 }
 
