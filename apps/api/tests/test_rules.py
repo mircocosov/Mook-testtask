@@ -20,7 +20,7 @@ def db():
 
 
 def seed(db: Session):
-    user = User(email='owner@test.dev', password_hash='x')
+    user = User(username='owner', email='owner@test.dev', password_hash='x')
     db.add(user); db.commit(); db.refresh(user)
     w = Wishlist(owner_id=user.id, public_id='public123', title='Birthday', description='desc', event_date=date.today())
     db.add(w); db.commit(); db.refresh(w)

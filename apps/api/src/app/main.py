@@ -1,4 +1,5 @@
 import secrets
+import re
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
@@ -110,16 +111,30 @@ def aggregate_items(db: Session, wishlist_id: UUID) -> list[ItemPublicView]:
 
 @app.post("/auth/register")
 def register(payload: UserCreate, response: Response, db: Session = Depends(get_db)):
+    username = payload.username.strip().lower()
+    if not re.fullmatch(r"[a-z0-9_]{3,30}", username):
+        raise HTTPException(422, "Username must contain only letters, digits, underscore (3-30 chars)")
+
     exists = db.scalar(select(User).where(User.email == payload.email.lower()))
     if exists:
         raise HTTPException(409, "Email already used")
-    user = User(email=payload.email.lower(), password_hash=hash_password(payload.password))
+
+    username_exists = db.scalar(select(User).where(User.username == username))
+    if username_exists:
+        raise HTTPException(409, "Username already used")
+
+    user = User(username=username, email=payload.email.lower(), password_hash=hash_password(payload.password))
     db.add(user)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "Email or username already used")
+
     db.refresh(user)
     access = create_token(str(user.id), "access", timedelta(minutes=settings.access_token_minutes))
     response.set_cookie("access_token", access, httponly=True, samesite="lax")
-    return {"id": str(user.id), "email": user.email}
+    return {"id": str(user.id), "email": user.email, "username": user.username}
 
 
 @app.post("/auth/login")
@@ -129,7 +144,12 @@ def login(payload: UserLogin, response: Response, db: Session = Depends(get_db))
         raise HTTPException(401, "Invalid credentials")
     access = create_token(str(user.id), "access", timedelta(minutes=settings.access_token_minutes))
     response.set_cookie("access_token", access, httponly=True, samesite="lax")
-    return {"id": str(user.id), "email": user.email}
+    return {"id": str(user.id), "email": user.email, "username": user.username}
+
+
+@app.get("/auth/me")
+def me(user: User = Depends(get_current_user)):
+    return {"id": str(user.id), "email": user.email, "username": user.username}
 
 
 @app.post("/auth/logout")
