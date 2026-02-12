@@ -1,0 +1,45 @@
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Node
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Alembic / DB
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# Misc
+tmp/
